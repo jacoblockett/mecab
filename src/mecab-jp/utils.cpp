@@ -19,11 +19,12 @@
 #include <dirent.h>
 #endif
 
-#ifdef HAVE_WINDOWS_H
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #define NOMINMAX
 #include <windows.h>
 #include <stdlib.h>
 #endif
+
 
 #include <stdint.h>
 
