@@ -1,0 +1,56 @@
+{
+	"name": "mecab",
+	"version": "0.0.0",
+	"description": "An N-API wrapper around the mecab/mecab-ko software.",
+	"type": "module",
+	"main": "dist/index.cjs",
+	"module": "dist/index.mjs",
+	"exports": {
+		"require": "./dist/index.cjs",
+		"import": "./dist/index.mjs"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/jacoblockett/mecab"
+	},
+	"scripts": {
+		"install": "node-gyp-build",
+		"build:native": "prebuildify --napi",
+		"test:mjs": "rollup -c && node dev/esm/sandbox.js",
+		"test:cjs": "rollup -c && node dev/cjs/sandbox.js",
+		"roll": "rollup -c"
+	},
+	"keywords": [
+		"mecab",
+		"mecab-ko",
+		"nlp",
+		"language",
+		"parsing",
+		"japanese",
+		"korean",
+		"jp",
+		"ko"
+	],
+	"files": [
+		"dist/",
+		"scripts/",
+		"src/",
+		"tp-licenses/",
+		"binding.gyp",
+		"LICENSE",
+		"README.md"
+	],
+	"license": "MIT",
+	"author": "Jacob Lockett",
+	"packageManager": "pnpm@10.21.0",
+	"devDependencies": {
+		"@rollup/plugin-commonjs": "^29.0.0",
+		"@rollup/plugin-node-resolve": "^16.0.3",
+		"prebuildify": "^6.0.1",
+		"rollup": "^4.53.3"
+	},
+	"dependencies": {
+		"node-addon-api": "^8.5.0",
+		"node-gyp-build": "^4.8.4"
+	}
+}
