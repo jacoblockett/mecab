@@ -47,6 +47,12 @@ extern "C" {
 #endif
 }
 
+#if !defined(_WIN32) || defined(__CYGWIN__)
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#endif
+
 #include "common.h"
 #include "utils.h"
 
