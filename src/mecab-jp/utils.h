@@ -20,21 +20,19 @@
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
-#else  // HAVE_STDINT_H
+#else // HAVE_STDINT_H
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #if defined(_MSC_VER) && (_MSC_VER <= 1500)
 typedef unsigned char uint8_t;
 typedef unsigned long uint32_t;
 typedef unsigned long long uint64_t;
-#else  // _MSC_VER
+#else // _MSC_VER
 #include <stdint.h>
-#endif  // _MSC_VER
-#else   // _WIN32
-typedef unsigned char uint8_t;
-typedef unsigned long uint32_t;
-typedef unsigned __int64 uint64_t;
-#endif  // _WIN32
-#endif  // HAVE_STDINT_H
+#endif // _MSC_VER
+#else // _WIN32
+#include <cstdint>
+#endif // _WIN32
+#endif // HAVE_STDINT_H
 
 namespace MeCabJp {
 

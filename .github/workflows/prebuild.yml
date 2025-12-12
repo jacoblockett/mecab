@@ -13,8 +13,6 @@ jobs:
             arch: x64
           - os: macos-latest
             arch: arm64
-          - os: macos-13-large
-            arch: x64
           - os: ubuntu-latest
             arch: x64
 
