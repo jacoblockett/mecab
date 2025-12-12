@@ -6,26 +6,18 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <stdint.h>
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+// Remove HAVE_CONFIG_H - you don't have config.h
 
-#ifdef HAVE_SYS_TYPES_H
+#if !defined(_WIN32) || defined(__CYGWIN__)
 #include <sys/types.h>
-#endif
-
-#ifdef HAVE_DIRENT_H
 #include <dirent.h>
-#endif
-
-#ifdef HAVE_WINDOWS_H
+#else
 #define NOMINMAX
 #include <windows.h>
 #include <stdlib.h>
 #endif
-
-#include <stdint.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 extern HINSTANCE DllInstanceKo;
@@ -35,6 +27,7 @@ extern HINSTANCE DllInstanceKo;
 #include "mecab.h"
 #include "param.h"
 #include "utils.h"
+
 
 namespace MeCabKo {
 
