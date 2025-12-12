@@ -75,7 +75,7 @@ func main() {
 
 	// download engine into appropriate runtime prebuild directory
 	rt := getRuntime()
-	engineDownloadUrl := fmt.Sprintf("%s/mecab-%s.zip", dlUrl, rt)
+	engineDownloadUrl := fmt.Sprintf("%s/prebuilds-%s-latest-%s.zip", dlUrl, runtime.GOOS, getArch())
 	engineZipPath := filepath.Join(tempDir, "engine.zip")
 	err = download(engineDownloadUrl, engineZipPath)
 	if err != nil {
@@ -90,7 +90,7 @@ func main() {
 	}
 	defer engineZip.Close()
 
-	prebuildDir := filepath.Join(exeDir, "..", "prebuilds", rt)
+	prebuildDir := filepath.Join(exeDir, "..", "prebuilds")
 	os.RemoveAll(prebuildDir)
 	err = os.MkdirAll(prebuildDir, 0755)
 	if err != nil {
@@ -146,12 +146,18 @@ func getRuntime() string {
 		p = "win32"
 	}
 
+	a := getArch()
+
+	return fmt.Sprintf("%s-%s", p, a)
+}
+
+func getArch() string {
 	a := runtime.GOARCH
 	if a == "amd64" {
 		a = "x64"
 	}
 
-	return fmt.Sprintf("%s-%s", p, a)
+	return a
 }
 
 type Pkg struct {
