@@ -1,6 +1,6 @@
 {
 	"name": "napi-mecab",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "A Node-API wrapper around the mecab/mecab-ko software.",
 	"type": "module",
 	"main": "dist/index.cjs",
@@ -14,7 +14,6 @@
 		"url": "https://github.com/jacoblockett/mecab"
 	},
 	"scripts": {
-		"install": "node-gyp-build",
 		"build:native": "prebuildify --napi",
 		"test:mjs": "rollup -c && node dev/esm/sandbox.js",
 		"test:cjs": "rollup -c && node dev/cjs/sandbox.js",
