@@ -61,8 +61,8 @@ npx node-gyp build # or rebuild, if needed
 
 Precompiled Japanese and Korean dictionaries exist in [releases](https://github.com/jacoblockett/napi-mecab/releases). Even if you compile the engine yourself, you'll need to find your own dictionaries. This package is configured to work first-class with Japanese and Korean using compiled dictionaries under the following paths:
 
-`node_modules/napi-mecab/dict/napi-mecab-jp-dict`<br/>
-`node_modules/napi-mecab/dict/napi-mecab-ko-dict`
+`node_modules/napi-mecab/dict/jp`<br/>
+`node_modules/napi-mecab/dict/ko`
 
 So long as you have compiled dictionaries under that path, it will choose the correct engine to use. However, you can also provide your own dictionary to use and pass the path to the `MeCab` class (see: [API Reference](#api-reference)). Whatever dictionary you choose to use, though, just remember that the original MeCab and the Korean patch are only designed to work with Japanese and Korean respectively. Unless you're using your own modified Japanese/Korean dictionaries, I highly recommend just using the dictionaries found in [releases](https://github.com/jacoblockett/napi-mecab/releases).
 
