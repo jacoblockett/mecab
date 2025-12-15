@@ -71,7 +71,7 @@ So long as you have compiled dictionaries under that path, it will choose the co
 ```js
 import MeCab from "napi-mecab"
 // cjs is also supported, i.e.
-// const MeCab = require("mecab")
+// const MeCab = require("napi-mecab")
 
 const text = "아버지가방에들어가신다"
 const parser = new MeCab({ engine: "ko" })
