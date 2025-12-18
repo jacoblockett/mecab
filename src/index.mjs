@@ -105,62 +105,6 @@ class Token {
 		this.#features = features.split(",")
 	}
 
-	get surface() {
-		return this.#surface
-	}
-
-	get pos() {
-		if (this.#engine === JP) {
-			const list = [this.#features[0]]
-
-			if (this.#features[1] !== EMPTY) {
-				list.push(this.#features[1])
-			}
-			if (this.#features[2] !== EMPTY) {
-				list.push(this.#features[2])
-			}
-			if (this.#features[3] !== EMPTY) {
-				list.push(this.#features[3])
-			}
-
-			return list
-		} else if (this.#engine === KO) {
-			return this.#features[0].split("+")
-		}
-	}
-
-	get hasBatchim() {
-		if (this.#engine === KO) {
-			return this.#features[2] === "T"
-		}
-
-		return null
-	}
-
-	get hasJongseong() {
-		if (this.#engine === KO) {
-			return this.#features[2] === "T"
-		}
-
-		return null
-	}
-
-	get reading() {
-		if (this.#engine === JP) {
-			return this.#features[7] !== EMPTY ? this.#features[7] : null
-		} else if (this.#engine === KO) {
-			return this.#features[3] !== EMPTY ? this.#features[3] : null
-		}
-	}
-
-	get pronunciation() {
-		if (this.#engine === JP) {
-			return this.#features[8] !== EMPTY ? this.#features[8] : null
-		} else if (this.#engine === KO) {
-			return this.#features[3] !== EMPTY ? this.#features[3] : null
-		}
-	}
-
 	get base() {
 		let base = this.#surface
 
@@ -192,14 +136,6 @@ class Token {
 		return null
 	}
 
-	get type() {
-		if (this.#engine === KO) {
-			return this.#features[4] !== EMPTY ? this.#features[4] : null
-		}
-
-		return null
-	}
-
 	get expression() {
 		if (this.#engine === KO) {
 			return this.#features[7] !== EMPTY ? this.#features[7].split("+").map(part => new ExpressionToken(part)) : null
@@ -208,18 +144,82 @@ class Token {
 		return null
 	}
 
+	get features() {
+		return this.#features
+	}
+
+	get hasBatchim() {
+		if (this.#engine === KO) {
+			return this.#features[2] === "T"
+		}
+
+		return null
+	}
+
+	get hasJongseong() {
+		if (this.#engine === KO) {
+			return this.#features[2] === "T"
+		}
+
+		return null
+	}
+
+	get pos() {
+		if (this.#engine === JP) {
+			const list = [this.#features[0]]
+
+			if (this.#features[1] !== EMPTY) {
+				list.push(this.#features[1])
+			}
+			if (this.#features[2] !== EMPTY) {
+				list.push(this.#features[2])
+			}
+			if (this.#features[3] !== EMPTY) {
+				list.push(this.#features[3])
+			}
+
+			return list
+		} else if (this.#engine === KO) {
+			return this.#features[0].split("+")
+		}
+	}
+
+	get pronunciation() {
+		if (this.#engine === JP) {
+			return this.#features[8] !== EMPTY ? this.#features[8] : null
+		} else if (this.#engine === KO) {
+			return this.#features[3] !== EMPTY ? this.#features[3] : null
+		}
+	}
+
+	get raw() {
+		return `${this.#surface}\t${this.#features.join(",")}`
+	}
+
+	get reading() {
+		if (this.#engine === JP) {
+			return this.#features[7] !== EMPTY ? this.#features[7] : null
+		} else if (this.#engine === KO) {
+			return this.#features[3] !== EMPTY ? this.#features[3] : null
+		}
+	}
+
 	get semanticClass() {
 		if (this.#engine === KO) {
 			return this.#features[1] !== EMPTY ? this.#features[1] : null
 		}
 	}
 
-	get features() {
-		return this.#features
+	get surface() {
+		return this.#surface
 	}
 
-	get raw() {
-		return `${this.#surface}\t${this.#features.join(",")}`
+	get type() {
+		if (this.#engine === KO) {
+			return this.#features[4] !== EMPTY ? this.#features[4] : null
+		}
+
+		return null
 	}
 }
 
