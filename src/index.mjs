@@ -129,10 +129,6 @@ class Token {
 		}
 	}
 
-	get hasMultiplePOS() {
-		return this.pos.length > 1
-	}
-
 	get hasJongseong() {
 		if (this.#engine === KO) {
 			return this.#features[2] === "T"
