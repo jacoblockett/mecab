@@ -129,6 +129,14 @@ class Token {
 		}
 	}
 
+	get hasBatchim() {
+		if (this.#engine === KO) {
+			return this.#features[2] === "T"
+		}
+
+		return null
+	}
+
 	get hasJongseong() {
 		if (this.#engine === KO) {
 			return this.#features[2] === "T"
