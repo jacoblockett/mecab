@@ -92,6 +92,12 @@ class Token {
 	#surface
 	#features
 
+	/**
+	 * A structure representing parsed data provided by MeCab.
+	 *
+	 * @param {"jp"|"ko"} engine The language engine used to parse the token
+	 * @param {string} raw The raw surface and feature set of the token
+	 */
 	constructor(engine, raw) {
 		if (engine !== JP && engine !== KO) {
 			throw new Error(`"${engine}" is not a supported mecab engine.`)
@@ -106,31 +112,14 @@ class Token {
 	}
 
 	get base() {
-		let base = this.#surface
+		if (this.#engine === KO) {
+			let base = this.#surface
 
-		if (this.#engine === JP) {
-			if (this.#features[6] !== EMPTY) {
-				base = this.#features[6]
-			}
-		} else if (this.#engine === KO) {
 			if (this.#features[4] !== EMPTY && this.#features[7] !== EMPTY) {
 				base = this.#features[7].split("/")[0]
 			}
-		}
 
-		return base
-	}
-
-	get conjugation() {
-		if (this.#engine === JP) {
-			if (this.#features[4] === EMPTY && this.#features[5] === EMPTY) {
-				return null
-			}
-
-			return {
-				...(this.#features[4] !== EMPTY ? { type: this.#features[4] } : {}),
-				...(this.#features[5] !== EMPTY ? { form: this.#features[5] } : {})
-			}
+			return base
 		}
 
 		return null
@@ -165,29 +154,13 @@ class Token {
 	}
 
 	get pos() {
-		if (this.#engine === JP) {
-			const list = [this.#features[0]]
-
-			if (this.#features[1] !== EMPTY) {
-				list.push(this.#features[1])
-			}
-			if (this.#features[2] !== EMPTY) {
-				list.push(this.#features[2])
-			}
-			if (this.#features[3] !== EMPTY) {
-				list.push(this.#features[3])
-			}
-
-			return list
-		} else if (this.#engine === KO) {
+		if (this.#engine === KO) {
 			return this.#features[0].split("+")
 		}
 	}
 
 	get pronunciation() {
-		if (this.#engine === JP) {
-			return this.#features[8] !== EMPTY ? this.#features[8] : null
-		} else if (this.#engine === KO) {
+		if (this.#engine === KO) {
 			return this.#features[3] !== EMPTY ? this.#features[3] : null
 		}
 	}
@@ -197,9 +170,7 @@ class Token {
 	}
 
 	get reading() {
-		if (this.#engine === JP) {
-			return this.#features[7] !== EMPTY ? this.#features[7] : null
-		} else if (this.#engine === KO) {
+		if (this.#engine === KO) {
 			return this.#features[3] !== EMPTY ? this.#features[3] : null
 		}
 	}
@@ -208,6 +179,8 @@ class Token {
 		if (this.#engine === KO) {
 			return this.#features[1] !== EMPTY ? this.#features[1] : null
 		}
+
+		return null
 	}
 
 	get surface() {
