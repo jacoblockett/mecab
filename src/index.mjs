@@ -192,11 +192,45 @@ class Token {
 		return null
 	}
 
+	get expression() {
+		if (this.#engine === KO) {
+			return this.#features[7] !== EMPTY ? this.#features[7].split("+").map(part => new ExpressionToken(part)) : null
+		}
+
+		return null
+	}
+
+	get semanticClass() {
+		if (this.#engine === KO) {
+			return this.#features[1] !== EMPTY ? this.#features[1] : null
+		}
+	}
+
 	get features() {
 		return this.#features
 	}
 
 	get raw() {
 		return `${this.#surface}\t${this.#features.join(",")}`
+	}
+}
+
+class ExpressionToken {
+	#features
+
+	constructor(raw) {
+		this.#features = raw.split("/")
+	}
+
+	get morpheme() {
+		return this.#features[0]
+	}
+
+	get pos() {
+		return this.#features[1]
+	}
+
+	get semanticClass() {
+		return this.#features[2] !== EMPTY ? this.#features[2] : null
 	}
 }
