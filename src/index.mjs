@@ -7,9 +7,9 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const require = createRequire(import.meta.url)
 const binding = require("node-gyp-build")(join(__dirname, ".."))
-const engineDicts = {
-	jp: join(__dirname, "..", "dict", "jp"),
-	ko: join(__dirname, "..", "dict", "ko")
+const dictionaries = {
+	jp: join(__dirname, "..", "dict", "jp-dict"),
+	ko: join(__dirname, "..", "dict", "ko-dict")
 }
 const JP = "jp" // UniDic
 const KO = "ko" // mecab-ko-dic
@@ -33,7 +33,7 @@ const KO_TAGS = {
 
 export default class MeCab {
 	#engine = JP
-	#dictPath = engineDicts[JP]
+	#dictPath = dictionaries[JP]
 	#tagger
 
 	/**
@@ -48,9 +48,9 @@ export default class MeCab {
 			if (typeof opts.engine === "string") {
 				const engine = opts.engine.trim().toLowerCase()
 
-				if (engineDicts[engine]) {
+				if (dictionaries[engine]) {
 					this.#engine = engine
-					this.#dictPath = engineDicts[engine]
+					this.#dictPath = dictionaries[engine]
 				} else {
 					throw new Error(`"${opts.engine}" is not a supported mecab engine.`)
 				}

@@ -7,17 +7,17 @@ const __filename$1 = fileURLToPath(import.meta.url);
 const __dirname$1 = dirname(__filename$1);
 const require$1 = createRequire(import.meta.url);
 const binding = require$1("node-gyp-build")(join(__dirname$1, ".."));
-const engineDicts = {
-	jp: join(__dirname$1, "..", "dict", "jp"),
-	ko: join(__dirname$1, "..", "dict", "ko")
+const dictionaries = {
+	jp: join(__dirname$1, "..", "dict", "jp-dict"),
+	ko: join(__dirname$1, "..", "dict", "ko-dict")
 };
-const JP = "jp";
-const KO = "ko";
+const JP = "jp"; // UniDic
+const KO = "ko"; // mecab-ko-dic
 const EMPTY = "*";
 
 class MeCab {
 	#engine = JP
-	#dictPath = engineDicts[JP]
+	#dictPath = dictionaries[JP]
 	#tagger
 
 	/**
@@ -32,9 +32,9 @@ class MeCab {
 			if (typeof opts.engine === "string") {
 				const engine = opts.engine.trim().toLowerCase();
 
-				if (engineDicts[engine]) {
+				if (dictionaries[engine]) {
 					this.#engine = engine;
-					this.#dictPath = engineDicts[engine];
+					this.#dictPath = dictionaries[engine];
 				} else {
 					throw new Error(`"${opts.engine}" is not a supported mecab engine.`)
 				}
@@ -92,6 +92,12 @@ class Token {
 	#surface
 	#features
 
+	/**
+	 * A structure representing parsed data provided by MeCab.
+	 *
+	 * @param {"jp"|"ko"} engine The language engine used to parse the token
+	 * @param {string} raw The raw surface and feature set of the token
+	 */
 	constructor(engine, raw) {
 		if (engine !== JP && engine !== KO) {
 			throw new Error(`"${engine}" is not a supported mecab engine.`)
@@ -105,42 +111,93 @@ class Token {
 		this.#features = features.split(",");
 	}
 
-	get surface() {
-		return this.#surface
-	}
-
-	get primaryPOS() {
+	/**
+	 * The form of conjugation being used on the word, e.g. present tense, continuative form, etc.
+	 *
+	 * @note **Japanese only**
+	 * @return {string|null}
+	 */
+	get conjugationForm() {
 		if (this.#engine === JP) {
-			return this.#features[0]
-		} else if (this.#engine === KO) {
-			return this.#features[0].split("+")[0]
+			return this.#features[5] !== EMPTY ? this.#features[5] : null
 		}
+
+		return null
 	}
 
-	get allPOS() {
+	/**
+	 * The conjugation type, e.g. regular, irregular, etc.
+	 *
+	 * @note **Japanese only**
+	 * @return {string|null}
+	 */
+	get conjugationType() {
 		if (this.#engine === JP) {
-			const list = [this.#features[0]];
-
-			if (this.#features[1] !== EMPTY) {
-				list.push(this.#features[1]);
-			}
-			if (this.#features[2] !== EMPTY) {
-				list.push(this.#features[2]);
-			}
-			if (this.#features[3] !== EMPTY) {
-				list.push(this.#features[3]);
-			}
-
-			return list
-		} else if (this.#engine === KO) {
-			return this.#features[0].split("+")
+			return this.#features[4] !== EMPTY ? this.#features[4] : null
 		}
+
+		return null
 	}
 
-	get hasMultiplePOS() {
-		return this.allPOS.length > 1
+	/**
+	 * The broken-down details of how the token is formed.
+	 *
+	 * @note **Korean only**
+	 * @returns {ExpressionToken[]|null}
+	 */
+	get expression() {
+		if (this.#engine === KO) {
+			return this.#features[7] !== EMPTY ? this.#features[7].split("+").map(part => new ExpressionToken(part)) : null
+		}
+
+		return null
 	}
 
+	/**
+	 * The raw features string returned by the underlying MeCab engine.
+	 *
+	 * @returns {string}
+	 */
+	get features() {
+		return this.#features
+	}
+
+	/**
+	 * The grammatical role this token's form serves within the sentence.
+	 *
+	 * @note **Japanese only**
+	 * @returns {string|null}
+	 */
+	get grammaticalRole() {
+		if (this.#engine === JP) {
+			return this.#features[19] !== EMPTY ? this.#features[19] : null
+		}
+
+		return null
+	}
+
+	/**
+	 * Whether the token has a final consonant or not.
+	 *
+	 * @alias hasJongseong
+	 * @note **Korean only**
+	 * @returns {boolean|null}
+	 */
+	get hasBatchim() {
+		if (this.#engine === KO) {
+			return this.#features[2] === "T"
+		}
+
+		return null
+	}
+
+	/**
+	 * Whether the token has a final consonant or not.
+	 *
+	 * @alias hasBatchim
+	 * @note **Korean only**
+	 * @returns {boolean|null}
+	 */
 	get hasJongseong() {
 		if (this.#engine === KO) {
 			return this.#features[2] === "T"
@@ -149,45 +206,171 @@ class Token {
 		return null
 	}
 
-	get pronunciation() {
+	/**
+	 * The actual dictionary headword as the token would appear in a dictionary.
+	 *
+	 * @returns {string|null}
+	 */
+	get lemma() {
 		if (this.#engine === JP) {
-			return this.#features[7] !== EMPTY ? this.#features[7] : null
-		} else if (this.#engine === KO) {
-			return this.#features[3] !== EMPTY ? this.#features[3] : null
+			return this.#features[7]
 		}
-	}
 
-	get base() {
-		let base = this.#surface;
+		if (this.#engine === KO) {
+			let base = this.#surface;
 
-		if (this.#engine === JP) {
-			if (this.#features[6] !== EMPTY) {
-				base = this.#features[6];
-			}
-		} else if (this.#engine === KO) {
 			if (this.#features[4] !== EMPTY && this.#features[7] !== EMPTY) {
 				base = this.#features[7].split("/")[0];
 			}
-		}
 
-		return base
+			if (isVerb) base = `${base}다`;
+
+			return base
+		}
 	}
 
-	get conjugation() {
+	/**
+	 * The orthographic kana spelling of the dictionary form of the token, as you would see in textbooks.
+	 *
+	 * @note **Japanese only**
+	 * @returns {string|null}
+	 */
+	get lemmaKana() {
 		if (this.#engine === JP) {
-			if (this.#features[4] === EMPTY && this.#features[5] === EMPTY) {
-				return null
-			}
-
-			return {
-				...(this.#features[4] !== EMPTY ? { type: this.#features[4] } : {}),
-				...(this.#features[5] !== EMPTY ? { form: this.#features[5] } : {})
-			}
+			return this.#features[6] !== EMPTY ? this.#features[6] : null
 		}
 
 		return null
 	}
 
+	/**
+	 * The natural pronunciation of the dictionary form of the token.
+	 *
+	 * @note **Japanese only**
+	 * @returns {string|null}
+	 */
+	get lemmaPronunciation() {
+		if (this.#engine === JP) {
+			return this.#features[11] !== EMPTY ? this.#features[11] : null
+		}
+
+		return null
+	}
+
+	/**
+	 * The origin of the word.
+	 *
+	 * @note **Japanese only**
+	 * @note Includes whether this token is considered a symbol or punctuation
+	 * @returns {string|null}
+	 */
+	get origin() {
+		if (this.#engine === JP) {
+			return this.#features[12] !== EMPTY ? this.#features[12] : null
+		}
+
+		return null
+	}
+
+	/**
+	 * The pitch accent information indicating where pitch rises/falls in the token.
+	 *
+	 * @note **Japanese only**
+	 * @returns {string|null}
+	 */
+	get pitch() {
+		if (this.#engine === JP) {
+			return this.#features[24] !== EMPTY ? this.#features[24] : null
+		}
+
+		return null
+	}
+
+	/**
+	 * The parts of speech that make up this token.
+	 *
+	 * Japanese: An array with the following potential structure [primary_pos, pos_subcategory_1, pos_subcategory_2, pos_subcategory_3]
+	 *
+	 * Korean: An array of tags representing what parts of speech exist within the token.
+	 *
+	 * @returns {string[]}
+	 */
+	get pos() {
+		if (this.#engine === JP) {
+			const list = [this.#features[0]];
+
+			if (this.#features[1] !== EMPTY) list.push(this.#features[1]);
+			if (this.#features[2] !== EMPTY) list.push(this.#features[2]);
+			if (this.#features[3] !== EMPTY) list.push(this.#features[3]);
+
+			return list
+		}
+
+		if (this.#engine === KO) {
+			return this.#features[0].split("+")
+		}
+	}
+
+	/**
+	 * How the token, as written, is pronounced.
+	 *
+	 * @returns {string|null}
+	 */
+	get pronunciation() {
+		if (this.#engine === JP) {
+			return this.#features[9] !== EMPTY ? this.#features[9] : null
+		}
+
+		if (this.#engine === KO) {
+			return this.#features[3] !== EMPTY ? this.#features[3] : null
+		}
+	}
+
+	/**
+	 * The raw string returned by the underlying MeCab engine.
+	 *
+	 * @returns {string}
+	 */
+	get raw() {
+		return `${this.#surface}\t${this.#features.join(",")}`
+	}
+
+	/**
+	 * The semantic word class or category this token belongs to.
+	 *
+	 * @note **Korean only**
+	 * @returns {string|null}
+	 */
+	get semanticClass() {
+		if (this.#engine === KO) {
+			return this.#features[1] !== EMPTY ? this.#features[1] : null
+		}
+
+		return null
+	}
+
+	/**
+	 * How the token looks in the input text you provided.
+	 *
+	 * Japanese: For some compound analysis, the surface form may be slightly different from the
+	 * first column form found in the raw results.
+	 *
+	 * @returns {string}
+	 */
+	get surface() {
+		if (this.#engine === JP && this.#features[8] !== EMPTY) {
+			return this.#features[8]
+		}
+
+		return this.#surface
+	}
+
+	/**
+	 * The type of token this token is, e.g. inflection, compound noun, etc.
+	 *
+	 * @note **Korean only**
+	 * @returns {string|null}
+	 */
 	get type() {
 		if (this.#engine === KO) {
 			return this.#features[4] !== EMPTY ? this.#features[4] : null
@@ -195,13 +378,47 @@ class Token {
 
 		return null
 	}
+}
 
-	get features() {
-		return this.#features
+class ExpressionToken {
+	#features
+
+	/**
+	 * An expression piece of a larger expression whole that details the individual tokens that make up an agglutinated token.
+	 *
+	 * @note **Korean only**
+	 *
+	 * @param {string} raw The raw expression string
+	 */
+	constructor(raw) {
+		this.#features = raw.split("/");
 	}
 
-	get raw() {
-		return `${this.#surface}\t${this.#features.join(",")}`
+	/**
+	 * The normalized token.
+	 *
+	 * @returns {string}
+	 */
+	get morpheme() {
+		return this.#features[0]
+	}
+
+	/**
+	 * The part of speech of the token.
+	 *
+	 * @returns {string}
+	 */
+	get pos() {
+		return this.#features[1]
+	}
+
+	/**
+	 * The semantic word class or category this token belongs to.
+	 *
+	 * @returns {string|null}
+	 */
+	get semanticClass() {
+		return this.#features[2] !== EMPTY ? this.#features[2] : null
 	}
 }
 
