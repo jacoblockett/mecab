@@ -159,7 +159,7 @@ class Token {
 	 * The broken-down details of how the token is formed.
 	 *
 	 * @note **Korean only**
-	 * @returns {string|null}
+	 * @returns {ExpressionToken[]|null}
 	 */
 	get expression() {
 		if (this.#engine === KO) {
